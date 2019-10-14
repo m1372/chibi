@@ -7,8 +7,19 @@ class Val(object):
         return f'Val({self.value})'
     def eval(self):
         return self.value
-        
 
 v = Val(1)
 print(v)
 assert v.eval() == 1
+
+class Add(object):
+    __slots__=['left','right']
+    def __init__(self,a,b):
+        self.left = a
+        self.right = b
+    def eval(self):
+        return self.left + self.right
+
+e = Add(1,2)
+print(e.eval())
+assert e.eval() == 3
