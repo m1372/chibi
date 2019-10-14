@@ -21,9 +21,34 @@ class Add(object):
         return self.left.eval() + self.right.eval()
 
 e = Add(Val(1),Val(2))
-print(e.eval())
 assert e.eval() == 3
-
-
+print(e.eval())
 e = Add(Val(1),Add(Val(2),Val(3)))
+assert e.eval() == 6
+print(e.eval())
+
+
+class Mul(object):
+    __slots__=['left','right']
+    def __init__(self,a,b):
+        self.left = a
+        self.right = b
+    def eval(self):
+        return self.left.eval() * self.right.eval()
+
+e = Mul(Val(1),Val(2))
+assert e.eval() == 2
+print(e.eval())
+
+
+class Sub(object):
+    __slots__=['left','right']
+    def __init__(self,a,b):
+        self.left = a
+        self.right = b
+    def eval(self):
+        return self.left.eval() - self.right.eval()
+
+e = Sub(Val(1),Val(2))
+assert e.eval() == -1
 print(e.eval())
