@@ -7,6 +7,7 @@ class Val(object):
         return f'Val({self.value})'
     def eval(self):
         return self.value
+        
 
 v = Val(1)
 print(v)
