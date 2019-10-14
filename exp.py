@@ -18,8 +18,8 @@ class Add(object):
         self.left = a
         self.right = b
     def eval(self):
-        return self.left + self.right
+        return self.left.eval() + self.right.eval()
 
-e = Add(1,2)
+e = Add(Val(1),Val(2))
 print(e.eval())
 assert e.eval() == 3
