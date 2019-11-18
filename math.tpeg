@@ -6,5 +6,5 @@ Zip = {
     #Zip
 }
 
-Value = { DIGIT + #Int }
+Value = { DIGIT+ #Int }
 DIGIT = [0-9]
