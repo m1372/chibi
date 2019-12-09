@@ -2,14 +2,12 @@ import pegpy
 #from pegpy.tpeg import ParseTree
 peg = pegpy.grammar('chibi.tpeg')
 parser = pegpy.generate(peg)
-
 '''
 tree = parser('1+2*3')
 print(repr(tree))
 tree = parser('1@2*3')
 print(repr(tree))
 '''
-
 class Expr(object):
     @classmethod
     def new(cls, v):
@@ -55,6 +53,22 @@ class Mod(Binary):
     def eval(self, env: dict):
         return self.left.eval(env) % self.right.eval(env)
 
+class Eq(Binary): #left == right
+    __slots__ = ['left', 'right']
+    def eval(self, env: dict): #cond ? x:y
+        return 1 if self.left.eval(env) == self.right.eval(env) else 0
+
+class Ne(Binary): #left != right
+    __slots__ = ['left', 'right']
+    def eval(self, env: dict): #cond ? x:y
+        return 1 if self.left.eval(env) != self.right.eval(env) else 0
+
+class Lt(Binary): #left < right
+    __slots__ = ['left', 'right']
+    def eval(self, env: dict): #cond ? x:y
+        return 1 if self.left.eval(env) < self.right.eval(env) else 0
+
+
 class Var(Expr):
     __slots__ = ['name']
     def __init__(self, name):
@@ -63,29 +77,14 @@ class Var(Expr):
         if self.name in env:
             return env[self.name]
         raise NameError(self.name)
-
-
 class Assign(Expr):
     __slots__ = ['name', 'e']
     def __init__(self, name, e):
         self.name = name
         self.e = Expr.new(e)
-
     def eval(self, env):
         env[self.name] = self.e.eval(env)
         return env[self.name]
-
-print("少しテスト")
-
-env = {}
-e = Assign('x', Val(1))  # x = 1 
-print(e.eval(env)) # 1
-e = Assign('x', Add(Var('x'),Val(2))) # x = x + 2
-print(e.eval(env)) # 3
-
-print("テスト終わり")
-
-
 def conv(tree):
     if tree == 'Block':
         return conv(tree[0])
@@ -93,6 +92,10 @@ def conv(tree):
         return Val(int(str(tree)))
     if tree == 'Add':
         return Add(conv(tree[0]), conv(tree[1]))
+    if tree == 'Sub':
+        return Sub(conv(tree[0]), conv(tree[1]))    
+    if tree == 'Mul':
+        return Mul(conv(tree[0]), conv(tree[1]))
     if tree == 'Div':
         return Div(conv(tree[0]), conv(tree[1]))
     if tree == 'Mod':
@@ -103,16 +106,14 @@ def conv(tree):
         return Assign(str(tree[0]), conv(tree[1]))
     print('@TODO', tree.tag, repr(tree))
     return Val(str(tree))
-
 def run(src: str, env: dict):
     tree = parser(src)
     if tree.isError():
         print(repr(tree))
     else:
         e = conv(tree)
-        print('env',env)
+        print('env', env)
         print(e.eval(env))
-
 def main():
     try:
         env = {}
