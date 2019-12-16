@@ -122,7 +122,7 @@ class If(Expr):
 
 class Lambda(Expr):
     __slots__ = ['name','body']
-    def __init__(self, cond, then, else_ ):
+    def __init__(self, name, body ):
         self.name = name
         self.body = body
     
@@ -135,16 +135,28 @@ class Lambda(Expr):
 f = Lambda('x', Add(Var('x'),1)) #λx.x+1
 print(repr(f))
 
+def copy(env): #環境をコピーすることでローカルスコープを作る
+    newenv = {}
+    for x in env.keys():
+        newenv[x] = env[x]
+    return env
+
 def FuncApp(Expr):
     __slots__ = ['func','param']
-    def __init__(self, func, Lambda, param ):
-        self.self = self
-        self.param = param
-    
-    def eval(self, env):
-        pass
+    def __init__(self, func:Lambda, param ):
+        self.func = func
+        self.param = Expr.new(param)
+    def __repr__(self):
+        return f'({repr(self.func)})({repr(self.param)})'
 
-e = FuncApp('f', Val(1,1)) ##(λx.x+1)(0)
+    def eval(self, env):
+        v = self.param.eval(env) #パラメータを先に評価する
+        name = self.func.name #Lambdaの変数名をとる
+        env[name] = v #環境から引数を渡す
+        return self.func.body.eval(env)
+    
+
+e = FuncApp('f', Add(1,1)) ##(λx.x+1)(0)
                            ##f(x) = x+1  F(1+1)と同じ
 assert e.eval() == 3
 
@@ -152,6 +164,10 @@ assert e.eval() == 3
 def conv(tree):
     if tree == 'Block':
         return conv(tree[0])
+    if tree == 'FuncDecl':
+        return If(conv(tree[0]), conv(tree[1]), conv(tree[2]))
+    if tree == 'FuncApp':
+        return While(conv(tree[0]), conv(tree[1]))
     if tree == 'If':
         return If(conv(tree[0]), conv(tree[1]), conv(tree[2]))
     if tree == 'While':
